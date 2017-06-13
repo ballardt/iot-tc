@@ -1,2 +1,2 @@
-# itc
+# `iot-tc`
 IoT traffic classification
