@@ -19,11 +19,8 @@ new="new.csv"
 prev="prev.csv"
 cd $splitDir
 
-# Output CSV header
-echo "device,date,sleep_time,active_volume,avg_packet_size,mean_rate,peak_to_mean_rate,active_time,num_servers,num_protocols,unique_dns_reqs,dns_interval,ntp_interval" > $outfile
-
 # Output "device" and "date" columns
-for d in ./*/ ; do (trim=${d:2:-1}; echo "${trim//_/,}") ; done >> $outfile
+for d in ./*/ ; do (trim=${d:2:-1}; echo "${trim//_/,}") ; done > $outfile
 echo "Beginning extraction..."
 
 # Sleep time
@@ -103,3 +100,8 @@ echo "Began extracting NTP interval"
 for d in ./*/ ; do (cd "$d" && cat conn.log | sort -n | awk 'NR>8 && $6==123 { if (last!=0) {sum+=$1-last; n++} last=$1 } END { if (n>0) { printf("%f\n", sum/n) } else {print "N/A"} }') ; done > $new
 cat $outfile > $prev
 paste $prev $new -d , > $outfile
+
+
+# Output CSV header
+echo -e "device,date,sleep_time,active_volume,avg_packet_size,mean_rate,peak_to_mean_rate,active_time,num_servers,num_protocols,unique_dns_reqs,dns_interval,ntp_interval\n$(cat $outfile)" > $outfile
+
