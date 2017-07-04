@@ -1,20 +1,29 @@
 #!/bin/bash
-
 ########################################
 # Split all pcaps in a folder into the #
 # workshop paper device flows          #
 ########################################
 
-# Globals
-outfile="features.csv"
-new="new.csv"
-prev="prev.csv"
-
-# Be sure we're in the right place
-cd /home/trevor/Projects/iot-diff/data/filtered
+# Ensure we have enough arguments
+if [ "$#" -ne 2 ]
+then
+  echo "Usage: ./extract.sh <path/to/split-dates/dir> <path/to/output/CSV/dir>"
+  exit 1
+fi
 
 # Preliminary
-for d in ./*/ ; do (trim=${d:2:-1}; echo "${trim//_/,}") ; done > $outfile
+curDir=`dirname "$(readlink -f "$0")"`
+splitDir="${1%/}"
+outfile="$curDir/${2%/}/split-dates-features.csv"
+new="new.csv"
+prev="prev.csv"
+cd $splitDir
+
+# Output CSV header
+echo "device,date,sleep_time,active_volume,avg_packet_size,mean_rate,peak_to_mean_rate,active_time,num_servers,num_protocols,unique_dns_reqs,dns_interval,ntp_interval" > $outfile
+
+# Output "device" and "date" columns
+for d in ./*/ ; do (trim=${d:2:-1}; echo "${trim//_/,}") ; done >> $outfile
 echo "Beginning extraction..."
 
 # Sleep time

@@ -4,9 +4,6 @@
 # workshop paper device flows          #
 ########################################
 
-# TODO: Devfile and nonfile should be changed since the actual
-#       files aren't used any more
-
 # Define the list of device MAC addresses
 Devices[0]='d0:52:a8:00:67:5e'
 Devices[1]='44:65:0d:56:cc:d3'
@@ -31,52 +28,63 @@ Devices[19]='18:b7:9e:02:20:44'
 Devices[20]='e0:76:d0:33:bb:85'
 Devices[21]='70:5a:0f:e4:9b:c0'
 
-# Be sure we're in the right place
-cd /home/trevor/Projects/iot-diff/data/raw/
-rm -rf ../filtered
-mkdir ../filtered
+# Ensure we have enough arguments
+if [ "$#" -ne 2 ]
+then
+  echo "Usage: ./split-dates.sh <path/to/raw/pcap/dir> <path/to/output/dir>"
+  exit 1
+fi
 
-# Split pcap per device per date and build the command for noniot packets
-for date in *.pcap; do
-  nonFile="noniot_${date%.*}.pcap"
-  noniotCmd="tcpdump -nnr ../../raw/$date -w data.pcap 'not ("
+# Preliminary
+curDir=`dirname "$(readlink -f "$0")"`
+rawDir="${1%/}"
+outDir="${2%/}"/split-dates
+rm -rf $outDir
+mkdir $outDir
+
+# Split pcap per device per date and build the command for non-IoT packets
+for datePcap in $rawDir/*.pcap; do
+  nonCmd=""
+  datePcap=${datePcap##*/}
   for d in "${Devices[@]}"; do
-    devFile="${d//:/-}.pcap"
-    devDate="${devFile%.*}_${date%.*}"
+    # Filter the pcap for only this device
+    devDate="${d//:/-}_${datePcap%.*}"
+    mkdir $outDir/$devDate
+    tcpdump -nnr $rawDir/$datePcap -w "$outDir/$devDate/data.pcap" "(ether host $d)"
 
-    mkdir ../filtered/$devDate
-    cd ../filtered/$devDate
-
-    tcpdump -nnr ../../raw/$date -w 'data.pcap' '(ether host '$d')'
-
-    # Analyze with Bro
+    # Analyze with Bro (have to `cd`)
+    cd $outDir/$devDate
     bro -r 'data.pcap'
 
-    # Get rid of empty directories
+    # Get rid of empty directories, which indicates that there's no traffic for
+    # this device on this date. Empty directories complicate things down the line,
+    # so it's easiest to remove them here.
     if [ ! -f conn.log ]; 
     then
       cd ../
       rm -rf $devDate
-      cd ../raw
-    else
-      cd ../../raw
     fi
+    cd $curDir
 
-    # Filter out this device for the non-IoT pcap
-    noniotCmd="$noniotCmd(ether host $d) or "
+    # Filter out this device for the non-IoT pcap by building up $nonCmd over
+    # all devices for this date.
+    nonCmd="$nonCmd(ether host $d) or "
   done
 
-  # Generate pcap for noniot packets
-  cd ../filtered/
-  nonFolder="${nonFile%.*}"
-  mkdir $nonFolder
-  cd $nonFolder
-  noniotCmd="${noniotCmd% or })'"
-  eval $noniotCmd
+  # Generate pcap for non-IoT packets on this date
+  nonDir="noniot_${datePcap%.*}"
+  mkdir $outDir/$nonDir
+  nonCmd="${nonCmd% or })'"
+  nonCmd="tcpdump -nnr $rawDir/$datePcap -w $outDir/$nonDir/data.pcap 'not ($nonCmd"
+  eval $nonCmd
 
-  # Analyze with Bro
+  # Analyze with Bro (have to `cd`), remove if empty
+  cd $outDir/$nonDir
   bro -r data.pcap
-
-  cd ../../raw
+  if [ ! -f conn.log ]; 
+  then
+    cd ../
+    rm -rf $nonDir
+  fi
+  cd $curDir
 done
-
