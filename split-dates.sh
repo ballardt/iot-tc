@@ -5,6 +5,7 @@
 ########################################
 
 # Define the list of device MAC addresses
+# IoT
 Devices[0]='d0:52:a8:00:67:5e'
 Devices[1]='44:65:0d:56:cc:d3'
 Devices[2]='70:ee:50:18:34:43'
@@ -27,6 +28,20 @@ Devices[18]='d0:73:d5:01:83:08'
 Devices[19]='18:b7:9e:02:20:44'
 Devices[20]='e0:76:d0:33:bb:85'
 Devices[21]='70:5a:0f:e4:9b:c0'
+# non-IoT
+# TODO 020c & fce3?
+Devices[22]='00:24:e4:10:ee:4c'
+Devices[23]='08:21:ef:3b:fc:e3'
+Devices[24]='14:cc:20:51:33:ea'
+Devices[25]='30:8c:fb:b6:ea:45'
+Devices[26]='40:f3:08:ff:1e:da'
+Devices[27]='74:2f:68:81:69:42'
+Devices[28]='8a:05:81:fa:cc:14'
+Devices[29]='ac:bc:32:d4:6f:2f'
+Devices[30]='b4:ce:f6:a7:a3:c2'
+Devices[31]='d0:a6:37:df:a1:e1'
+Devices[32]='d2:13:91:23:2a:58'
+Devices[33]='f4:5c:89:93:cc:85'
 
 # Ensure we have enough arguments
 if [ "$#" -ne 2 ]
