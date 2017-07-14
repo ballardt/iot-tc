@@ -70,7 +70,6 @@ for datePcap in $rawDir/*.pcap; do
  
     # Analyze with Bro (have to `cd`)
     cd $outDir/$devDate
-    pwd;
     bro -r 'data.pcap'
 
     # Get rid of empty directories, which indicates that there's no traffic for
