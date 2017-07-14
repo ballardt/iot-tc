@@ -216,9 +216,9 @@ urls = [
 ]
 terms = [
     'science',
-    'nature',
-    'math',
-    'life'
+#    'nature',
+#    'math',
+#    'life'
 ]
 pprint.pprint(scrape_relevant_words(urls, terms))
 

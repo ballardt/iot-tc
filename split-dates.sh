@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh -x
 ########################################
 # Split all pcaps in a folder into the #
 # workshop paper device flows          #
@@ -55,7 +55,7 @@ curDir=`dirname "$(readlink -f "$0")"`
 rawDir="${1%/}"
 outDir="${2%/}"/split-dates
 rm -rf $outDir
-mkdir $outDir
+mkdir -p $outDir
 
 # Split pcap per device per date and build the command for non-IoT packets
 for datePcap in $rawDir/*.pcap; do
@@ -64,11 +64,13 @@ for datePcap in $rawDir/*.pcap; do
   for d in "${Devices[@]}"; do
     # Filter the pcap for only this device
     devDate="${d//:/-}_${datePcap%.*}"
-    mkdir $outDir/$devDate
-    tcpdump -nnr $rawDir/$datePcap -w "$outDir/$devDate/data.pcap" "(ether host $d)"
-
+    mkdir -p $outDir/$devDate
+    tcpdump -nnr "$rawDir/$datePcap" -w "$outDir/$devDate/data.pcap" "(ether host $d)"
+    echo tcpdump -nnr $rawDir/$datePcap -w "$outDir/$devDate/data.pcap" "(ether host $d)"
+ 
     # Analyze with Bro (have to `cd`)
     cd $outDir/$devDate
+    pwd;
     bro -r 'data.pcap'
 
     # Get rid of empty directories, which indicates that there's no traffic for
@@ -88,7 +90,7 @@ for datePcap in $rawDir/*.pcap; do
 
   # Generate pcap for non-IoT packets on this date
   nonDir="noniot_${datePcap%.*}"
-  mkdir $outDir/$nonDir
+  mkdir -p $outDir/$nonDir
   nonCmd="${nonCmd% or })'"
   nonCmd="tcpdump -nnr $rawDir/$datePcap -w $outDir/$nonDir/data.pcap 'not ($nonCmd"
   eval $nonCmd
