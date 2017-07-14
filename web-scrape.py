@@ -10,7 +10,7 @@
 # Go to "Models" tab and double click "punkt". Close the window once
 # it's downloaded. The package is 13MB.
 import nltk
-nltk.download()
+# nltk.download()
 
 
 # In[150]:
@@ -202,8 +202,8 @@ def fetch_relevant_words(hostname, terms, num_sites=5):
 # In[157]:
 
 # Example of how to do it all: Google, Wiki, and the homepage
-results = {k: fetch_relevant_words(v, general_terms) for k, v in device_terms.items()}
-pprint.pprint(results)
+#results = {k: fetch_relevant_words(v, general_terms) for k, v in device_terms.items()}
+#pprint.pprint(results)
 
 
 # In[158]:
