@@ -12,12 +12,14 @@ then
 fi
 
 # Preliminary
-curDir=`dirname "$(readlink -f "$0")"`
-splitDir="${1%/}"
-outfile="$curDir/${2%/}/split-dates-features.csv"
+# curDir=`dirname "$(readlink -f "$0")"`
+splitDir="$1/"
+outfile="$2/split-dates-features.csv"
+#outfile="my-split-dates-features.csv"
 new="new.csv"
 prev="prev.csv"
 cd $splitDir
+#echo $splitDir
 
 # Output "device" and "date" columns
 for d in ./*/ ; do (trim=${d:2:-1}; echo "${trim//_/,}") ; done > $outfile
