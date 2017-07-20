@@ -4,7 +4,7 @@ from scipy.spatial.distance import cdist
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
@@ -140,7 +140,7 @@ def cycle_remove_devices(data, device_categories):
             test = data[data['device']==d]
             # Train
             features = df.columns[2:-1]
-            clf = RandomForestClassifier()
+            clf = DecisionTreeClassifier(criterion='entropy')
             clf.fit(train[features], train['device_category'])
             # Test
             ps = clf.predict(test[features])
@@ -170,10 +170,11 @@ def cycle_remove_devices_binary(data, device_categories):
             test = data[data['device']==d]
             # Train
             features = df.columns[2:-1]
-            clf = RandomForestClassifier()
+            clf = DecisionTreeClassifier(criterion='entropy')
             y = train['device_category']!='non_iot'
             clf.fit(train[features], y)
             # Test
+            print(d)
             ps = clf.predict(test[features])
             gt = assign_category(d)
             bags.insert(0, {
@@ -203,7 +204,7 @@ def holdout(data, device_names, n=10):
         test = data[data['device'].isin(holdout_devices)]
         # Train
         features = df.columns[2:-1]
-        clf = RandomForestClassifier()
+        clf = DecisionTreeClassifier(criterion='entropy')
         clf.fit(train[features], train['device_category'])
         # Test
         score = clf.score(test[features], test['device_category'])
@@ -224,7 +225,7 @@ def holdout_binary(data, device_names, n=20):
         test = data[data['device'].isin(holdout_devices)]
         # Train
         features = df.columns[2:-1]
-        clf = RandomForestClassifier()
+        clf = DecisionTreeClassifier(criterion='entropy')
         clf.fit(train[features], train['device_category']!='non_iot')
         # Test
         score = clf.score(test[features], test['device_category']!='non_iot')
