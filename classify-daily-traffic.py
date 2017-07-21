@@ -292,4 +292,27 @@ if __name__=='__main__':
     print(bin_holdout_df)
     print('----------------------------------')
 
+    clf = DecisionTreeClassifier(criterion='entropy')
+    clf.fit(df[df.columns[2:-1]], df['device_category']!='non_iot')
+    print('IoT v. non-IoT feature importances:')
+    for ft, imp in zip(df.columns[2:-1], clf.feature_importances_):
+        print('{0}: {1:.3f}'.format(ft, imp))
+    print('----------------------------------')
+    from sklearn import tree
+    tree.export_graphviz(clf, 
+        out_file='non-v-iot.dot',
+        feature_names=df.columns[2:-1],
+        class_names=['IoT' if c else 'non-IoT' for c in clf.classes_])
+
+    clf = DecisionTreeClassifier(criterion='entropy')
+    clf.fit(df[df.columns[2:-1]], df['device_category'])
+    print('Device category feature importances:')
+    for ft, imp in zip(df.columns[2:-1], clf.feature_importances_):
+        print('{0}: {1:.3f}'.format(ft, imp))
+    print('----------------------------------')
+    tree.export_graphviz(clf, 
+        out_file='dev-cat.dot', 
+        feature_names=df.columns[2:-1],
+        class_names=clf.classes_)
+
     print('Execution finished')
