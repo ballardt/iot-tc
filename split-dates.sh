@@ -57,9 +57,8 @@ outDir="${2%/}"/split-dates
 rm -rf $outDir
 mkdir -p $outDir
 
-# Split pcap per device per date and build the command for non-IoT packets
+# Split pcap per device per date
 for datePcap in $rawDir/*.pcap; do
-  nonCmd=""
   datePcap=${datePcap##*/}
   for d in "${Devices[@]}"; do
     # Filter the pcap for only this device
@@ -81,26 +80,5 @@ for datePcap in $rawDir/*.pcap; do
       rm -rf $devDate
     fi
     cd $curDir
-
-    # Filter out this device for the non-IoT pcap by building up $nonCmd over
-    # all devices for this date.
-    nonCmd="$nonCmd(ether host $d) or "
   done
-
-  # Generate pcap for non-IoT packets on this date
-  nonDir="noniot_${datePcap%.*}"
-  mkdir -p $outDir/$nonDir
-  nonCmd="${nonCmd% or })'"
-  nonCmd="tcpdump -nnr $rawDir/$datePcap -w $outDir/$nonDir/data.pcap 'not ($nonCmd"
-  eval $nonCmd
-
-  # Analyze with Bro (have to `cd`), remove if empty
-  cd $outDir/$nonDir
-  bro -r data.pcap
-  if [ ! -f conn.log ]; 
-  then
-    cd ../
-    rm -rf $nonDir
-  fi
-  cd $curDir
 done
