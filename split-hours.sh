@@ -31,17 +31,17 @@ Devices[21]='70:5a:0f:e4:9b:c0'
 # non-IoT
 # TODO 020c & fce3?
 Devices[22]='00:24:e4:10:ee:4c'
-Devices[23]='08:21:ef:3b:fc:e3'
-Devices[24]='14:cc:20:51:33:ea'
-Devices[25]='30:8c:fb:b6:ea:45'
-Devices[26]='40:f3:08:ff:1e:da'
-Devices[27]='74:2f:68:81:69:42'
+Devices[23]='08:21:ef:3b:fc:e3' # Samsung Galaxy Tab
+Devices[24]='14:cc:20:51:33:ea' # TPLink Router Bridge LAN (Gateway)
+Devices[25]='30:8c:fb:b6:ea:45' # Nest Dropcam
+Devices[26]='40:f3:08:ff:1e:da' # Android phone
+Devices[27]='74:2f:68:81:69:42' # Laptop
 Devices[28]='8a:05:81:fa:cc:14'
-Devices[29]='ac:bc:32:d4:6f:2f'
-Devices[30]='b4:ce:f6:a7:a3:c2'
-Devices[31]='d0:a6:37:df:a1:e1'
+Devices[29]='ac:bc:32:d4:6f:2f' # Macbook
+Devices[30]='b4:ce:f6:a7:a3:c2' # Android phone
+Devices[31]='d0:a6:37:df:a1:e1' # IPhone
 Devices[32]='d2:13:91:23:2a:58'
-Devices[33]='f4:5c:89:93:cc:85'
+Devices[33]='f4:5c:89:93:cc:85' # MacBook/IPhone
 
 # Ensure we have enough arguments
 if [ "$#" -ne 2 ]
