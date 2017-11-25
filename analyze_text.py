@@ -53,11 +53,13 @@ def run_lda(texts_tokens, num_topics=30, dictionary_save_name='dictionary.gensim
     ldamodel.save(model_save_name)
     if print_topics:
         print("TOPICS:")
-        topics = ldamodel.print_topics(num_words=10)
+        topics = ldamodel.print_topics(num_words=3)
         for topic in topics:
             print(topic)
 
-def run_tfidf(texts, rand_score=False, num_clusters=34, perplexity=30, max_df=0.8, min_df=0.0):
+    return ldamodel
+
+def run_tfidf(texts, rand_score=False, num_clusters=34, draw_graph=False, perplexity=30, max_df=0.8, min_df=0.0):
     # texts: [(name, content{, label}), ...]
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.cluster import KMeans
@@ -65,13 +67,14 @@ def run_tfidf(texts, rand_score=False, num_clusters=34, perplexity=30, max_df=0.
     import pandas as pd
     import seaborn as sb
     from matplotlib import pyplot as plt
-    
+    from spherecluster import SphericalKMeans
+
     tfidf_vectorizer = TfidfVectorizer(max_df=max_df, max_features=200000, min_df=min_df,
                                        stop_words='english', use_idf=True, 
-                                       tokenizer=prepare_text_for_lda, ngram_range=(1,2))
-    tfidf_matrix = tfidf_vectorizer.fit_transform([t[0] for t in texts])
+                                       tokenizer=prepare_text_for_lda, ngram_range=(1,1))
+    tfidf_matrix = tfidf_vectorizer.fit_transform([t[1] for t in texts])
     feature_names = tfidf_vectorizer.get_feature_names()
-    feature_indices = {doc: tfidf_matrix[doc,:].nonzero()[0] for doc in range(tfidf_matrix.shape[0])}
+    feature_indices = {doc: tfidf_matrix[doc,:].nonzero()[1] for doc in range(tfidf_matrix.shape[0])}
     tfidf_scores = {doc: zip(ft_ind, [tfidf_matrix[doc,x] for x in ft_ind])
                     for doc, ft_ind in feature_indices.items()}
 
@@ -79,16 +82,19 @@ def run_tfidf(texts, rand_score=False, num_clusters=34, perplexity=30, max_df=0.
     km = KMeans(n_clusters=num_clusters)
     km.fit(tfidf_matrix)
     clusters = km.labels_.tolist()
-    tsne = TSNE(n_components=2, perplexity=30, random_state=1)
-    tsne_pos = tsne.fit_transform(tfidf_matrix.toarray())
+    skm = SphericalKMeans(n_cluster=num_clusters)
+    skm.fit(tfidf_matrix)
 
-    # Graphing
-    xs, ys = tsne_pos[:, 0], tsne_pos[:, 1]
-    pre_df = list(zip([t[0] for t in texts], xs, ys, clusters))
-    df = pd.DataFrame(pre_df)
-    df.columns = ['name', 'x', 'y', 'category']
-    plt.figure(figsize=(15,15))
-    sb.pairplot(data=df, hue='category')
+    if draw_graph:
+        tsne = TSNE(n_components=2, perplexity=30, random_state=1)
+        tsne_pos = tsne.fit_transform(tfidf_matrix.toarray())
+        # Graphing
+        xs, ys = tsne_pos[:, 0], tsne_pos[:, 1]
+        pre_df = list(zip([t[0] for t in texts], xs, ys, clusters))
+        df = pd.DataFrame(pre_df)
+        df.columns = ['name', 'x', 'y', 'category']
+        plt.figure(figsize=(15,15))
+        sb.pairplot(data=df, hue='category')
 
     # Adjusted Rand score
     if rand_score:
@@ -101,3 +107,5 @@ def run_tfidf(texts, rand_score=False, num_clusters=34, perplexity=30, max_df=0.
         df['ground_truth_factor'] = pd.factorize(df['ground_truth'])[0]
         ars = metrics.adjusted_rand_score(df['ground_truth_factor'], df['category'])
         print('Adjusted Rand score:', ars)
+
+    return feature_names, feature_indices, tfidf_scores, tfidf_matrix, km, skm
