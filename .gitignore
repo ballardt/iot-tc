@@ -1,3 +1,7 @@
+# User-added
+apnews_dbow/
+datasets/duc200*/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
